@@ -17,6 +17,16 @@ var handleDomo = function handleDomo(e) {
 	return false;
 };
 
+var deleteDomo = function deleteDomo(e) {
+
+	var id = $(e.currentTarget).attr("data-domoid");
+	var csrf = $("#csrf").val();
+
+	sendAjax('POST', "/deleteDomo", "_csrf=" + csrf + "&id=" + id, function () {
+		loadDomosFromServer();
+	});
+};
+
 var DomoForm = function DomoForm(props) {
 	return React.createElement(
 		"form",
@@ -39,9 +49,63 @@ var DomoForm = function DomoForm(props) {
 			"Age: "
 		),
 		React.createElement("input", { id: "domoAge", type: "text", name: "age", placeholder: "Domo Age" }),
-		React.createElement("input", { type: "hidden", name: "_csrf", value: props.csrf }),
+		React.createElement(
+			"label",
+			{ htmlFor: "element" },
+			"Element: "
+		),
+		React.createElement(
+			"select",
+			{ id: "domoElement", name: "element" },
+			React.createElement(
+				"option",
+				{ value: "0" },
+				"Water"
+			),
+			React.createElement(
+				"option",
+				{ value: "1" },
+				"Fire"
+			),
+			React.createElement(
+				"option",
+				{ value: "2" },
+				"Earth"
+			),
+			React.createElement(
+				"option",
+				{ value: "3" },
+				"Wind"
+			),
+			React.createElement(
+				"option",
+				{ value: "4" },
+				"Time"
+			),
+			React.createElement(
+				"option",
+				{ value: "5" },
+				"Space"
+			),
+			React.createElement(
+				"option",
+				{ value: "6" },
+				"Mirage"
+			)
+		),
+		React.createElement("input", { id: "csrf", type: "hidden", name: "_csrf", value: props.csrf }),
 		React.createElement("input", { className: "makeDomoSubmit", type: "submit", value: "Make Domo" })
 	);
+};
+
+var domoElementImgStruct = {
+	0: "water.png",
+	1: "fire.png",
+	2: "earth.png",
+	3: "wind.png",
+	4: "time.png",
+	5: "space.png",
+	6: "mirage.png"
 };
 
 var DomoList = function DomoList(props) {
@@ -58,6 +122,9 @@ var DomoList = function DomoList(props) {
 	}
 
 	var domoNodes = props.domos.map(function (domo) {
+
+		var elementImgUrl = "/assets/img/icons/" + domoElementImgStruct[domo.element];
+
 		return React.createElement(
 			"div",
 			{ key: domo._id, className: "domo" },
@@ -75,6 +142,19 @@ var DomoList = function DomoList(props) {
 				" Age: ",
 				domo.age,
 				" "
+			),
+			React.createElement(
+				"h3",
+				{ className: "domoElement" },
+				" Element: "
+			),
+			React.createElement("img", { src: elementImgUrl, alt: "Domo Element", className: "domoElement" }),
+			React.createElement(
+				"button",
+				{ className: "deleteButton", onClick: function onClick(e) {
+						deleteDomo(e);
+					}, "data-domoid": domo._id },
+				"Delete Domo"
 			)
 		);
 	});

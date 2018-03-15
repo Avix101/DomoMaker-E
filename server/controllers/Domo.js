@@ -13,13 +13,14 @@ const makerPage = (req, res) => {
 };
 
 const makeDomo = (req, res) => {
-  if (!req.body.name || !req.body.age) {
-    return res.status(400).json({ error: 'RAWR! Both name and age are required' });
+  if (!req.body.name || !req.body.age || !req.body.element) {
+    return res.status(400).json({ error: 'RAWR! All fields are required' });
   }
 
   const domoData = {
     name: req.body.name,
     age: req.body.age,
+    element: req.body.element,
     owner: req.session.account._id,
   };
 
@@ -55,8 +56,33 @@ const getDomos = (request, response) => {
   });
 };
 
+const deleteDomo = (request, response) => {
+  const req = request;
+  const res = response;
+
+  if (!req.body.id) {
+    return res.status(400).json({ error: 'RAWR! Cannot delete unspecified domo' });
+  }
+
+  const domoId = req.body.id;
+
+	// Remove the requested domo- but filter by session owner and id
+	// We don't want someone who doesn't own the domo to be able to delete it
+  const domoPromise = Domo.DomoModel.remove({ _id: domoId, owner: req.session.account._id });
+
+  domoPromise.then(() => res.json({ redirect: '/maker' }));
+
+  domoPromise.catch((err) => {
+    console.log(err);
+    return res.status(400).json({ error: 'An error occured' });
+  });
+
+  return domoPromise;
+};
+
 module.exports = {
   makerPage,
   getDomos,
   make: makeDomo,
+  deleteDomo,
 };
